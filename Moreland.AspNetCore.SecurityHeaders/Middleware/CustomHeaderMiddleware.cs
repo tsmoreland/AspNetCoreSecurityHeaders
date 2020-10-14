@@ -14,29 +14,27 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
 namespace Moreland.AspNetCore.SecurityHeaders.Middleware
 {
     /// <summary>
-    /// XFrameOptions Middleware providing support for adding X-Frame-Options header
+    /// Middleware responsible for adding custom header at the end of a request
     /// </summary>
-    public class XFrameOptionsMiddleware
+    public class CustomHeaderMiddleware
     {
-        private readonly IOptions<XFrameOptions> _options;
-        private readonly CustomHeaderMiddleware _middleware;
+        private readonly Func<string> _getHeaderName;
+        private readonly Func<string> _getHeaderValue;
 
         /// <summary>
-        /// Instantiates a new instance of the <see cref="XFrameOptionsMiddleware"/> class.
+        /// Instantiates a new instance of the <see cref="CustomHeaderMiddleware"/> class.
         /// </summary>
-        /// <param name="options">middleware options</param>
         /// <exception cref="ArgumentNullException">
-        /// if <paramref name="options"/> is null.
+        /// if <paramref name="getHeaderName"/> or <paramref name="getHeaderValue"/> is <c>null</c>
         /// </exception>
-        public XFrameOptionsMiddleware(IOptions<XFrameOptions> options)
+        public CustomHeaderMiddleware(Func<string> getHeaderName, Func<string> getHeaderValue)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-            _middleware = new CustomHeaderMiddleware(() => "X-Frame-Options", GetHeaderValue);
+            _getHeaderName = getHeaderName ?? throw new ArgumentNullException(nameof(getHeaderName));
+            _getHeaderValue = getHeaderValue ?? throw new ArgumentNullException(nameof(getHeaderValue));
         }
 
         /// <summary>
@@ -45,18 +43,21 @@ namespace Moreland.AspNetCore.SecurityHeaders.Middleware
         /// <param name="context">current request context</param>
         /// <param name="next">next handler in the pipeline</param>
         /// <returns></returns>
-        public Task InvokeAsync(HttpContext context, RequestDelegate next) => 
-            _middleware.InvokeAsync(context, next);
-
-        private string GetHeaderValue()
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            var headerValue = _options.Value.Type.GetDescriptionOrEmpty();
-            if (string.IsNullOrEmpty(headerValue))
-                return string.Empty;
+            GuardAgainst.NullArgument(next);
 
-            return (_options.Value.Type == XFrameOptionValue.AllowFrom && _options.Value.AllowFromSource != null)
-                ? $"{headerValue} {_options.Value.AllowFromSource}"
-                : headerValue;
+            await next(context).ConfigureAwait(true);
+
+            if (context == null!)
+                return;
+
+            var name = _getHeaderName();
+            var value = _getHeaderValue();
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value))
+                return;
+
+            context.Response.Headers.Add(name, value);
         }
     }
 }

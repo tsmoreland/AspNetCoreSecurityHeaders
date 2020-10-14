@@ -12,48 +12,22 @@
 // 
 
 using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Moreland.AspNetCore.SecurityHeaders
 {
     /// <summary>
-    /// Extension methods used to add and configure security header support middleware
+    /// X-Frame-Option Options
     /// </summary>
-    public static class SecurityHeadersAppBuilderExtensions
+    public class XFrameOptions
     {
         /// <summary>
-        /// Adds and configues security headers support    
+        /// X-Frame-Options type
         /// </summary>
-        /// <param name="services"></param>
-        /// <param name="optionsBuilder"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">
-        /// if <paramref name="services"/> is <c>null</c>
-        /// </exception>
-        public static IServiceCollection AddSecurityHeaders(this IServiceCollection services, Action<XFrameOptions>? optionsBuilder = null)
-        {
-            GuardAgainst.NullArgument(services);
-
-            if (optionsBuilder != null)
-                services.Configure(optionsBuilder);
-
-            return services;
-        }
+        public XFrameOptionValue Type { get; set; } = XFrameOptionValue.SameOrigin;
 
         /// <summary>
-        /// 
+        /// Optional Allow-From Source, only used if <see cref="Type"/> is <see cref="XFrameOptionValue.AllowFrom"/>
         /// </summary>
-        /// <param name="app"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">
-        /// if <paramref name="app"/> is <c>null</c>
-        /// </exception>
-        public static IApplicationBuilder UseXFrameOptions(this IApplicationBuilder app)
-        {
-            GuardAgainst.NullArgument(app);
-
-            return app;
-        }
+        public Uri? AllowFromSource { get; set; } 
     }
 }
