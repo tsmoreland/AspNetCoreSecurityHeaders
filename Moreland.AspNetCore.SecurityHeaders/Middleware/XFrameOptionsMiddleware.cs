@@ -11,52 +11,62 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
+using Moreland.AspNetCore.SecurityHeaders.Functional;
 
 namespace Moreland.AspNetCore.SecurityHeaders.Middleware
 {
     /// <summary>
     /// XFrameOptions Middleware providing support for adding X-Frame-Options header
     /// </summary>
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class XFrameOptionsMiddleware
     {
-        private readonly IOptions<XFrameOptions> _options;
-        private readonly CustomHeaderMiddleware _middleware;
+        private readonly RequestDelegate _next;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="XFrameOptionsMiddleware"/> class.
         /// </summary>
-        /// <param name="options">middleware options</param>
-        /// <exception cref="ArgumentNullException">
-        /// if <paramref name="options"/> is null.
-        /// </exception>
-        public XFrameOptionsMiddleware(IOptions<XFrameOptions> options)
+        /// <param name="next">next delegate in the pipeline</param>
+        public XFrameOptionsMiddleware(RequestDelegate next)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-            _middleware = new CustomHeaderMiddleware(() => "X-Frame-Options", GetHeaderValue);
+            _next = next;
         }
 
         /// <summary>
         /// runs the next middleware in the chain then adds X-FrameOptions header value
         /// </summary>
         /// <param name="context">current request context</param>
-        /// <param name="next">next handler in the pipeline</param>
+        /// <param name="options">next handler in the pipeline</param>
         /// <returns></returns>
-        public Task InvokeAsync(HttpContext context, RequestDelegate next) => 
-            _middleware.InvokeAsync(context, next);
-
-        private string GetHeaderValue()
+        public async Task InvokeAsync(HttpContext context, IOptions<XFrameOptions> options)
         {
-            var headerValue = _options.Value.Type.GetDescriptionOrEmpty();
-            if (string.IsNullOrEmpty(headerValue))
-                return string.Empty;
+            GuardAgainst.NullArgument(context);
+            GuardAgainst.NullArgument(options);
 
-            return (_options.Value.Type == XFrameOptionValue.AllowFrom && _options.Value.AllowFromSource != null)
-                ? $"{headerValue} {_options.Value.AllowFromSource}"
+            context.Response.Headers.AddRangeIfNotNullOrEmpty(GetHeaderValue(options.Value));
+
+            if (_next != null!)
+                await _next(context).ConfigureAwait(true);
+        }
+
+        private static IEnumerable<KeyValuePair<string, StringValues>> GetHeaderValue(XFrameOptions options)
+        {
+            GuardAgainst.NullArgument(options);
+
+            var headerValue = options.Type.GetDescriptionOrEmpty();
+            if (string.IsNullOrEmpty(headerValue))
+                return new [] {HeaderKeyValuePairBuilder.Build("X-Frame-Options")};
+
+            headerValue = (options.Type == XFrameOptionValue.AllowFrom && options.AllowFromSource != null)
+                ? $"{headerValue} {options.AllowFromSource}"
                 : headerValue;
+
+            return new [] {HeaderKeyValuePairBuilder.Build("X-Frame-Options", headerValue)};
         }
     }
 }

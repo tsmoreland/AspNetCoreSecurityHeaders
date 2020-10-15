@@ -11,39 +11,21 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
-namespace Moreland.AspNetCore.SecurityHeaders
+namespace Moreland.AspNetCore.SecurityHeaders.Functional
 {
-    internal static class ExtensionMethods
+    internal static class HeaderKeyValuePairBuilder
     {
-        public static string GetDescriptionOrEmpty(this Enum value)
+        public static KeyValuePair<string, StringValues> Build(string key, params string[] values)
         {
-            GuardAgainst.NullArgument(value);
+            GuardAgainst.NullArgument(key);
 
-            var enumType = value.GetType();
-            var memberInfo = enumType.GetMember(value.ToString()).FirstOrDefault(info => info.DeclaringType == enumType);
-            var descriptionAttribute = memberInfo?.GetCustomAttribute<DescriptionAttribute>(false);
+            values = values.Where(v => !string.IsNullOrEmpty(v)).ToArray();
 
-            return descriptionAttribute != null
-                ? descriptionAttribute.Description
-                : string.Empty;
-        }
-
-        public static void AddRangeIfNotNullOrEmpty(this IHeaderDictionary source, IEnumerable<KeyValuePair<string, StringValues>> values)
-        {
-            GuardAgainst.NullArgument(source);
-            if (values == null!)
-                return;
-
-            foreach (var value in values.Where(v => !string.IsNullOrEmpty(v.Key) && v.Value.Any()))
-                source.Add(value);
+            return new KeyValuePair<string, StringValues>(key, new StringValues(values));
         }
     }
 }

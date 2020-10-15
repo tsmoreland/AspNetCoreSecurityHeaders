@@ -14,6 +14,7 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Moreland.AspNetCore.SecurityHeaders.Middleware;
 
 namespace Moreland.AspNetCore.SecurityHeaders
 {
@@ -53,6 +54,7 @@ namespace Moreland.AspNetCore.SecurityHeaders
         {
             GuardAgainst.NullArgument(app);
 
+            app.UseMiddleware<XFrameOptionsMiddleware>();
             return app;
         }
     }

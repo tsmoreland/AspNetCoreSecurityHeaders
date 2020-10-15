@@ -1,0 +1,19 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Simple Test Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Hello World.</p>
+    
+</div>
+<div class="text-left">
+    <ul class="list-group list-group-flush">
+        @foreach (var header in Model.Headers)
+        {
+            <li class="list-group-item">@header</li>
+        }
+    </ul>
+</div>

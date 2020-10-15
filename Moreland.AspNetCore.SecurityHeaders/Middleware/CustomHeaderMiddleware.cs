@@ -12,8 +12,10 @@
 // 
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 
 namespace Moreland.AspNetCore.SecurityHeaders.Middleware
 {
@@ -22,23 +24,21 @@ namespace Moreland.AspNetCore.SecurityHeaders.Middleware
     /// </summary>
     public class CustomHeaderMiddleware
     {
-        private readonly Func<string> _getHeaderName;
-        private readonly Func<string> _getHeaderValue;
+        private readonly Func<IEnumerable<KeyValuePair<string, StringValues>>> _getHeaders;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="CustomHeaderMiddleware"/> class.
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// if <paramref name="getHeaderName"/> or <paramref name="getHeaderValue"/> is <c>null</c>
+        /// if <paramref name="getHeaders"/> 
         /// </exception>
-        public CustomHeaderMiddleware(Func<string> getHeaderName, Func<string> getHeaderValue)
+        public CustomHeaderMiddleware(Func<IEnumerable<KeyValuePair<string, StringValues>>> getHeaders)
         {
-            _getHeaderName = getHeaderName ?? throw new ArgumentNullException(nameof(getHeaderName));
-            _getHeaderValue = getHeaderValue ?? throw new ArgumentNullException(nameof(getHeaderValue));
+            _getHeaders = getHeaders ?? throw new ArgumentNullException(nameof(getHeaders));
         }
 
         /// <summary>
-        /// runs the next middleware in the chain then adds X-FrameOptions header value
+        /// adds a custom header provided to respones prior to running next delegate in the pipeline
         /// </summary>
         /// <param name="context">current request context</param>
         /// <param name="next">next handler in the pipeline</param>
@@ -47,17 +47,11 @@ namespace Moreland.AspNetCore.SecurityHeaders.Middleware
         {
             GuardAgainst.NullArgument(next);
 
-            await next(context).ConfigureAwait(true);
-
             if (context == null!)
                 return;
 
-            var name = _getHeaderName();
-            var value = _getHeaderValue();
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value))
-                return;
-
-            context.Response.Headers.Add(name, value);
+            context.Response.Headers.AddRangeIfNotNullOrEmpty(_getHeaders());
+            await next(context).ConfigureAwait(true);
         }
     }
 }

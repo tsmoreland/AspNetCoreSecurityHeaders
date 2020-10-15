@@ -3,12 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moreland.AspNetCore.SecurityHeaders", "Moreland.AspNetCore.SecurityHeaders\Moreland.AspNetCore.SecurityHeaders.csproj", "{EAE83132-7A76-4017-8DCA-4D2DE30C91F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moreland.AspNetCore.SecurityHeaders", "Moreland.AspNetCore.SecurityHeaders\Moreland.AspNetCore.SecurityHeaders.csproj", "{EAE83132-7A76-4017-8DCA-4D2DE30C91F3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1DAB27CF-105D-45B3-91EF-18B8689B52E0}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moreland.AspNetCore.SecurityHeaders.IntegrationTest", "Moreland.AspNetCore.SecurityHeaders.IntegrationTest\Moreland.AspNetCore.SecurityHeaders.IntegrationTest.csproj", "{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +22,10 @@ Global
 		{EAE83132-7A76-4017-8DCA-4D2DE30C91F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAE83132-7A76-4017-8DCA-4D2DE30C91F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAE83132-7A76-4017-8DCA-4D2DE30C91F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

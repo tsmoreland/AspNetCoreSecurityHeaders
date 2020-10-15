@@ -13,37 +13,35 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
-namespace Moreland.AspNetCore.SecurityHeaders
+namespace Moreland.AspNetCore.SecurityHeaders.IntegrationTest.Pages
 {
-    internal static class ExtensionMethods
+    public class IndexModel : PageModel
     {
-        public static string GetDescriptionOrEmpty(this Enum value)
+        private readonly ILogger<IndexModel> _logger;
+
+        public IEnumerable<string> Headers { get; private set; } = Array.Empty<string>();
+
+        public IndexModel(ILogger<IndexModel> logger)
         {
-            GuardAgainst.NullArgument(value);
-
-            var enumType = value.GetType();
-            var memberInfo = enumType.GetMember(value.ToString()).FirstOrDefault(info => info.DeclaringType == enumType);
-            var descriptionAttribute = memberInfo?.GetCustomAttribute<DescriptionAttribute>(false);
-
-            return descriptionAttribute != null
-                ? descriptionAttribute.Description
-                : string.Empty;
+            _logger = logger;
         }
 
-        public static void AddRangeIfNotNullOrEmpty(this IHeaderDictionary source, IEnumerable<KeyValuePair<string, StringValues>> values)
+        public void OnGet()
         {
-            GuardAgainst.NullArgument(source);
-            if (values == null!)
-                return;
-
-            foreach (var value in values.Where(v => !string.IsNullOrEmpty(v.Key) && v.Value.Any()))
-                source.Add(value);
+            Headers = HttpContext.Response.Headers
+                .Where(kvp => !string.IsNullOrEmpty(kvp.Key))
+                .Select(kvp =>
+                {
+                    var (key, value) = kvp;
+                    string values = value.Any()
+                        ? $"{value.Aggregate((a, b) => $"{a}, {b}")}"
+                        : string.Empty;
+                    return $"{key ?? string.Empty}: {values}";
+                }).ToArray();
         }
     }
 }
