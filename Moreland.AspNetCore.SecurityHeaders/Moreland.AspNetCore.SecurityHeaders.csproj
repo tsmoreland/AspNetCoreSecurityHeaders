@@ -30,6 +30,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Debug\**" />
+    <EmbeddedResource Remove="Debug\**" />
+    <None Remove="Debug\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="../LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>

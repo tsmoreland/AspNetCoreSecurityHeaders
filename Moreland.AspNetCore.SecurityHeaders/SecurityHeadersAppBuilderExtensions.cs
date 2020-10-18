@@ -54,7 +54,7 @@ namespace Moreland.AspNetCore.SecurityHeaders
         {
             GuardAgainst.NullArgument(app);
 
-            app.UseMiddleware<XFrameOptionsMiddleware>();
+            app.UseMiddleware<SecurityHeadersMiddleware>();
             return app;
         }
     }

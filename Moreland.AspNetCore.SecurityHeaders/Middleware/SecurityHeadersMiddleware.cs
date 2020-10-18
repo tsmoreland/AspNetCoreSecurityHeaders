@@ -11,6 +11,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // 
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -24,15 +25,15 @@ namespace Moreland.AspNetCore.SecurityHeaders.Middleware
     /// XFrameOptions Middleware providing support for adding X-Frame-Options header
     /// </summary>
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class XFrameOptionsMiddleware
+    public class SecurityHeadersMiddleware
     {
         private readonly RequestDelegate _next;
 
         /// <summary>
-        /// Instantiates a new instance of the <see cref="XFrameOptionsMiddleware"/> class.
+        /// Instantiates a new instance of the <see cref="SecurityHeadersMiddleware"/> class.
         /// </summary>
         /// <param name="next">next delegate in the pipeline</param>
-        public XFrameOptionsMiddleware(RequestDelegate next)
+        public SecurityHeadersMiddleware(RequestDelegate next)
         {
             _next = next;
         }
@@ -48,10 +49,23 @@ namespace Moreland.AspNetCore.SecurityHeaders.Middleware
             GuardAgainst.NullArgument(context);
             GuardAgainst.NullArgument(options);
 
-            context.Response.Headers.AddRangeIfNotNullOrEmpty(GetHeaderValue(options.Value));
+            // bit long winded but we but only way to ensure the headers remain during a 500 / exception
+            // see https://github.com/dotnet/aspnetcore/issues/2378#issuecomment-354673591
+            context.Response.OnStarting(AddHeaders, ValueTuple.Create(context, options.Value));
 
             if (_next != null!)
                 await _next(context).ConfigureAwait(true);
+
+            static Task AddHeaders(object contextWithOptionsObject)
+            {
+                if (!(contextWithOptionsObject is ValueTuple<HttpContext, XFrameOptions> contextWithOptions))
+                    return Task.CompletedTask;
+                var (context, options) = contextWithOptions;
+
+                context.Response.Headers.AddRangeIfNotNullOrEmpty(GetHeaderValue(options));
+
+                return Task.CompletedTask;
+            }
         }
 
         private static IEnumerable<KeyValuePair<string, StringValues>> GetHeaderValue(XFrameOptions options)

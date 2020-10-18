@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moreland.AspNetCore.SecurityHeaders.IntegrationTest", "Moreland.AspNetCore.SecurityHeaders.IntegrationTest\Moreland.AspNetCore.SecurityHeaders.IntegrationTest.csproj", "{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Moreland.AspNetCore.SecurityHeaders.IntegrationTest", "Moreland.AspNetCore.SecurityHeaders.IntegrationTest\Moreland.AspNetCore.SecurityHeaders.IntegrationTest.csproj", "{B97086FA-4DA1-4DC1-A9E7-0E45E8976D1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
